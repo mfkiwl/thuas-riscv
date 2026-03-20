@@ -47,6 +47,7 @@ int main(void)
 	uart1_printf("has bootloader: %s\r\n", (hw & CSR_MXHW_BOOT) ? "yes" : "no");
 	uart1_printf("has registers in RAM: %s\r\n", (hw & CSR_MXHW_REGRAM) ? "yes" : "no");
 	uart1_printf("has Zba extension: %s\r\n", (hw & CSR_MXHW_ZBA) ? "yes" : "no");
+	uart1_printf("has Zimop extension: %s\r\n", (hw & CSR_MXHW_ZIMOP) ? "yes" : "no");
 	uart1_printf("has Zicond: %s\r\n", (hw & CSR_MXHW_ZICOND) ? "yes" : "no");
 	uart1_printf("has Zbs extension: %s\r\n", (hw & CSR_MXHW_ZBS) ? "yes" : "no");
 	uart1_printf("UART1 break resets processor: %s\r\n", (hw & CSR_MXHW_BREAK) ? "yes" : "no");
