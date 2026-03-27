@@ -427,7 +427,7 @@ begin
                 end if; -- end cs = 1
                 
                 -- If timer is enabled....
-                if timerb.en= '1' then
+                if timerb.en = '1' then
                     -- If internal prescaler at end...
                     if timerb.prescaler >= timerb.prscshadow then
                         -- Wrap internal prescaler
@@ -661,7 +661,7 @@ begin
                     end if; -- end prescaler match
                 end if; -- timer enabled
             end if; -- sreset
-        end if;
+        end if; -- rising_edge
     end process;
 
     -- Generate Output Enabled
