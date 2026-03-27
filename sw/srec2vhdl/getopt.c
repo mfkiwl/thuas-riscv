@@ -1,5 +1,5 @@
 
-/* Microsoft C does not have a getopt functione */
+/* Microsoft C does not have a getopt function */
 #ifdef _MSC_VER
 
 
