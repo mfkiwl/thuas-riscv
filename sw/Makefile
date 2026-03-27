@@ -93,6 +93,8 @@ bin:
 	$(MKDIRCMD)
 	$(MAKE) -C srec2vhdl all
 	cp srec2vhdl/srec2vhdl$(EXESUFFIX) bin
+	$(MAKE) -C srec2mif all
+	cp srec2mif/srec2mif$(EXESUFFIX) bin
 	$(MAKE) -C upload all
 	cp upload/upload$(EXESUFFIX) bin
 	$(MAKE) -C lib all
@@ -102,6 +104,7 @@ $(SUBDIRS): bin
 
 clean:
 	$(MAKE) -C srec2vhdl clean
+	$(MAKE) -C srec2mif clean
 	$(MAKE) -C upload clean
 	rm -rf bin
 	$(MAKE) -C lib clean
