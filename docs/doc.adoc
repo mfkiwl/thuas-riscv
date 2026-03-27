@@ -275,6 +275,8 @@ image::images/read.svg[Image of the read operation]
 
 The memories are responsible for handling different data sizes and rearranging half word and byte access. When reading, the core expects half word data on the lower 16 bits of the data bus and bytes on the lower 8 bits of the databus. When writing the core puts half words on the lower 16 bits of the data bus and bytes on the lower 8 bits of the data bus. Sign and zero extension (for loads) is handled by the core. The memories are also responsible for generating access exceptions and misaligned exceptions.
 
+The memories are described in a device agnostic manner. It is up to the synthesizer to map onboard memory to the instantiated  memories. This can lead to excesive on-board RAM usage because the synthesizer is not able to create true dual-port RAM.
+
 === Address Decoder and Data Router
 
 The Address Decoder and Data Router routes reads and writes to the memory (ROM, bootloader ROM (only reads), RAM and the I/O). The processor uses a 32-bit linear address space for memory accesses. The address space is divided in 16 parts of 256 MB each. In the default setting, ROM starts at address 0x00000000 and the length is 64 kB. The bootloader ROM starts at address 0x10000000 and the length is 4 kB. Unused ROM addresses return 0x0000000. The RAM starts at address 0x20000000 and length is 32 kB. The I/O starts at address 0xF0000000 and the length is 4 kB by default.
@@ -728,7 +730,7 @@ In the created directory, you will see the following directories:
 `rtl` -- the VHDL description(s). +
 `sw` -- Sample software programs, linker script, library and startup files.
 
-Change directory to `sw`. Make sure the RISC-V C compiler is available and is in your path environment variable. Customize the file `common.make`. Now enter the command `make`. It will compile all programs and the support programs `srec2vhdl` and `upload`. To clean up the programs, issue the command `make clean`.
+Change directory to `sw`. Make sure the RISC-V C compiler is available and is in your path environment variable. Customize the file `common.make`. Now enter the command `make`. It will compile all programs and the support programs `srec2vhdl`, `srec2mif`  and `upload`. To clean up the programs, issue the command `make clean`.
 
 If you want, you can compile the processor with the standard program incorporated, which is by default, flashing onboard leds and writing the current time since last reset via UART1 at 115200 bps. Start your Quartus Prime Lite software and open the project in the `rtl` directory. Now start a build by clicking on the play-symbol. It should compile a standard setting (this takes some time). When finished, you can download the FPGA bitstream file to the DE0-CV board.
 
@@ -982,7 +984,7 @@ In the `sw` directory, there are a number of software programs available. First,
 ** `simple.S` -- contains the `_start` label and sets up the global pointer and stack pointer.
 ** `minimal.S` -- contains `_start` label, sets up the global pointer and stack pointer, calls `main` and halts the processor.
 ** `startup.c` -- full-fledged startup code for any C program executable.
-* `bin` -- contains the binaries of `srec2vhdl` and `upload`. This directory is created when running `make`.
+* `bin` -- contains the binaries of `srec2vhdl`, `srec2mif`  and `upload`. This directory is created when running `make`.
 * `include` -- contains the header files for the board support package. Use `#include <thuasrv32.h>` in programs.
 * `lib` -- contains the C files for the board suport package. Link against `libthuasrv32.a`.
 
@@ -1084,6 +1086,23 @@ srec2vhdl [-fdwhbvx0qB] [-i <arg>] inputfile [outputfile]
 
 Note: unused ROM addresses are not output, except when the `-0` or `-x` options are used.
 
+=== srec2mif
+
+This is a homebrew utility to convert a Motorola S-record file into a MIF file suitable for inclusion of the processor when using IP generated embedded RAM. The program is called with:
+
+[source,c,subs=attributes+]
+----
+srec2mif [-vqbhwd] inputfile [outputfile]
+----
+
+`inputfile` is the S-record file, created by the `objdump` program. `outputfile` is the MIF output file. When omitted, `stdout` is used. There are a number of options:
+
+* `-d` ROM contents is in double words (64 bits, Little Endian).
+* `-w` ROM contents is in words (32 bits, Little Endian).
+* `-h` ROM contents is in half words (16 bits, Little Endian).
+* `-b` ROM contents is in bytes (8 bits).
+* `-v` Verbose output.
+* `-q` Quiet output, only error messages are displayed.
 
 === upload
 
@@ -1095,7 +1114,7 @@ For using the I/O, see xref:bsp.adoc[Board Support Package]. It contains functio
 
 == Address ranges and memory sizes
 
-The processor uses a 32-bit linear address space (4 GB) and is divided in 16 blocks of 256 MB each. The top four bits (31 to 28) select a block while the remaining bits select the address within a block.
+The processor uses a 32-bit linear address space (4 GB) and is divided in 16 blocks of 256 MB each. The top four bits (31 down to 28) select a block while the remaining bits select the address within a block.
 By default, the ROM starts at address 0x00000000 and and has a size of 64 kB (16 k words). The Program Counter then starts at 0x00000000. The bootloader ROM starts at address 0x10000000 and has a size of 4 kB (1 k words). The Program Counter then starts at address 0x10000000. The RAM starts at address 0x20000000 and has a size of 32 kB (8 k words). The stack pointer is set to one address above the last RAM byte, by default at 0x20008000. The I/O starts at address 0xF0000000 and has a size of 4 kB (1 k words).
 
 The ROM, bootloader ROM, RAM and I/O may be moved to another start location. The Program Counter is started at the correct address. The placement of the ROM is in 256 MB intervals, which are the 4 most significant bits of a 32-bit address. The same holds for the RAM and the I/O. To move the memories, find the toplevel of the `riscv` entity. There you will see the following generics:
@@ -1416,9 +1435,9 @@ The OCD takes up a fair amount of ALMs (500 - 700) and lowers the $f_{max}$ with
 
 == Support for Windows tools [[sec_win]]
 
-There is support for Windows tools. Both `srec2vhdl` and `upload` can be build with GCC MinGW and Visual Studio. For building the RISC-V programs, a RISC-V GNU GCC compiler is needed.
+There is support for Windows tools. Both `srec2vhdl`, `srec2mif`  and `upload` can be build with GCC MinGW and Visual Studio. For building the RISC-V programs, a RISC-V GNU GCC compiler is needed.
 
-Best is to use a pre-compiled compiler for Windows and build tools (`make`, `rm`, `mkdir` etc.). Please have a look at https://xpack.github.io/dev-tools/riscv-none-elf-gcc/[xPack GNU RISC-V Embedded GCC] and https://xpack.github.io/dev-tools/windows-build-tools/[The xPack Windows Build Tools]. For building `srec2vhdl` and `upload`, you need a GCC native compiler. Have a look at https://xpack.github.io/dev-tools/gcc/[The xPack GNU Compiler Collection (GCC)]. OpenOCD can be found at https://xpack-dev-tools.github.io/openocd-xpack/[xPack OpenOCD].
+Best is to use a pre-compiled compiler for Windows and build tools (`make`, `rm`, `mkdir` etc.). Please have a look at https://xpack.github.io/dev-tools/riscv-none-elf-gcc/[xPack GNU RISC-V Embedded GCC] and https://xpack.github.io/dev-tools/windows-build-tools/[The xPack Windows Build Tools]. For building `srec2vhdl`, `srec2mif` and `upload`, you need a GCC native compiler. Have a look at https://xpack.github.io/dev-tools/gcc/[The xPack GNU Compiler Collection (GCC)]. OpenOCD can be found at https://xpack-dev-tools.github.io/openocd-xpack/[xPack OpenOCD].
 
 Before you can use OpenOCD with the FTDI FT2232H device, you need to replace the default driver with the libusb driver. This can easily be done with https://zadig.akeo.ie/[Zadig]. See xref:zadig.adoc[here]..
 
