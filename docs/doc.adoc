@@ -275,7 +275,7 @@ image::images/read.svg[Image of the read operation]
 
 The memories are responsible for handling different data sizes and rearranging half word and byte access. When reading, the core expects half word data on the lower 16 bits of the data bus and bytes on the lower 8 bits of the databus. When writing the core puts half words on the lower 16 bits of the data bus and bytes on the lower 8 bits of the data bus. Sign and zero extension (for loads) is handled by the core. The memories are also responsible for generating access exceptions and misaligned exceptions.
 
-The memories are described in a device agnostic manner. It is up to the synthesizer to map onboard memory to the instantiated  memories. This can lead to excesive on-board RAM usage because the synthesizer is not able to create true dual-port RAM.
+The memories are described in a device agnostic manner. It is up to the synthesizer to map onboard memory to the instantiated  memories. This can lead to excessive on-board RAM usage because the synthesizer is not able to create true dual-port RAM.
 
 === Address Decoder and Data Router
 
