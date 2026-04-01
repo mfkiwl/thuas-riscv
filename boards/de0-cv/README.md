@@ -1,7 +1,7 @@
 
-# DE0-CB extra ROM files
+# DE0-CV extra ROM files
 
-This is an implementation of the ROM using Altera altsyncram megafunction.
+This is an implementation of the ROM using Altera's `altsyncram` megafunction.
 When using this megafunction in combination with on-chip debugging and/or
 bootloader, only one copy of altsyncram will be the instantiated. The
 device agnostic standard VHDL code for the ROM will make two copies of
